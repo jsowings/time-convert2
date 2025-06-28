@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>US Time Zone Converter</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f7fa;
+        }
+        .container {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+        }
+        .input-section {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        label {
+            font-weight: 600;
+            color: #555;
+            font-size: 14px;
+        }
+        input[type="time"], select {
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        input[type="time"]:focus, select:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            align-self: flex-end;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .map-container {
+            margin: 30px 0;
+            text-align: center;
+        }
+        svg {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            background-color: #e8f4f8;
+        }
+        .state-block {
+            cursor: pointer;
+            transition: transform 0.2s, opacity 0.2s;
+        }
+        .state-block:hover {
+            transform: scale(1.05);
+            opacity: 0.9;
+        }
+        .state-label {
+            font-size: 14px;
+            pointer-events: none;
+        }
+        .timezone-zone {
+            transition: fill 0.3s, opacity 0.3s;
+            cursor: pointer;
+        }
+        .timezone-zone:hover {
+            opacity: 0.8;
+        }
+        .time-displays {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 30px;
+        }
+        .time-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            border: 2px solid transparent;
+            transition: all 0.3s;
+        }
+        .time-card.active {
+            border-color: #3498db;
+            background: #e3f2fd;
+        }
+        .timezone-name {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+        .timezone-time {
+            font-size: 24px;
+            color: #3498db;
+            font-weight: 300;
+        }
+        .timezone-label {
+            font-size: 12px;
+            font-weight: bold;
+            fill: #2c3e50;
+        }
+        .timezone-time-label {
+            font-size: 14px;
+            fill: #3498db;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🗺️ US Time Zone Converter</h1>
+        
+        <div class="input-section">
+            <div class="input-group">
+                <label for="timeInput">Time:</label>
+                <input type="time" id="timeInput" value="12:00">
+            </div>
+            <div class="input-group">
+                <label for="timezoneSelect">Your Time Zone:</label>
+                <select id="timezoneSelect">
+                    <option value="Eastern">Eastern (ET)</option>
+                    <option value="Central">Central (CT)</option>
+                    <option value="Mountain">Mountain (MT)</option>
+                    <option value="Pacific">Pacific (PT)</option>
+                    <option value="Alaska">Alaska (AKT)</option>
+                    <option value="Hawaii">Hawaii (HT)</option>
+                </select>
+            </div>
+            <button onclick="convertTime()">Convert Time</button>
+        </div>
+
+        <div class="map-container">
+            <svg width="900" height="580" viewBox="0 0 900 580">
+                <!-- US Map Background -->
+                <rect width="900" height="580" fill="#e8f4f8"/>
+                
+                <!-- Title -->
+                <text x="450" y="40" text-anchor="middle" style="font-size: 24px; font-weight: bold; fill: #2c3e50;">United States Time Zones</text>
+                
+                <!-- Alaska -->
+                <g class="state-block" data-timezone="Alaska">
+                    <rect x="110" y="80" width="60" height="60" fill="#ff9800" stroke="#fff" stroke-width="2"/>
+                    <text x="140" y="115" text-anchor="middle" class="state-label" fill="white" font-weight="bold">AK</text>
+                </g>
+                
+                <!-- Maine -->
+                <g class="state-block" data-timezone="Eastern">
+                    <rect x="710" y="80" width="60" height="60" fill="#f44336" stroke="#fff" stroke-width="2"/>
+                    <text x="740" y="115" text-anchor="middle" class="state-label" fill="white" font-weight="bold">ME</text>
+                </g>
+                
+                <!-- Row 1 with WI above IL -->
+                <g class="state-block" data-timezone="Central">
+                    <rect x="410" y="120" width="60" height="60" fill="#9c27b0" stroke="#fff" stroke-width="2"/>
+                    <text x="440" y="155" text-anchor="middle" class="state-label" fill="white" font-weight="bold">WI</text>
+                </g>
+                <g class="state-block" data-timezone="Eastern">
+                    <rect x="650" y="120" width="60" height="60" fill="#f44336" stroke="#fff" stroke-width="2"/>
+                    <text x="680" y="155" text-anchor="middle" class="state-label" fill="white" font-weight="bold">VT</text>
+                </g>
+                <g class="state-block" data-timezone="Eastern">
+                    <rect x="710" y="120" width="60" height="60" fill="#f44336" stroke="#fff" stroke-width="2"/>
+                    <text x="740" y="155" text-anchor="middle" class="state-label" fill="white" font-weight="bold">NH</text>
+                </g>
+                
+                <!-- Row 2 -->
+                <g class="state-block" data-timezone="Pacific">
+                    <rect x="110" y="180" width="60" height="60" fill="#4caf50" stroke="#fff" stroke-width="2"/>
+                    <text x="140" y="215" text-anchor="middle" class="state-label" fill="white" font-weight="bold">WA</text>
+                </g>
+                <g class="state-block" data-timezone="Mountain">
+                    <rect x="170" y="180" width="60" height="60" fill="#2196f3" stroke="#fff" stroke-width="2"/>
+                    <text x="200" y="215" text-anchor="middle" class="state-label" fill="white" font-weight="bold">ID</text>
+                </g>
+                <g class="state-block" data-timezone="Mountain">
+                    <rect x="230" y="180" width="60" height="60" fill="#2196f3" stroke="#fff" stroke-width="2"/>
+                    <text x="260" y="215" text-anchor="middle" class="state-label" fill="white" font-weight="bold">MT</text>
+                </g>
+                <g class="state-block" data-timezone="Central">
+                    <rect x="290" y="180" width="60" height="60" fill="#9c27b0" stroke="#fff" stroke-width="2"/>
+                    <text x="320" y="215" text-anchor="middle" class="state-label" fill="white" font-weight="bold">ND</text>
+                </g>
+                <g class="state-block" data-timezone="Central">
+                    <rect x="350" y="180" width="60" height="60" fill="#9c27b0" stroke="#fff" stroke-width="2"/>
+                    <text x="380" y="215" text-anchor="middle" class="state-label" fill="white" font-weight="bold">MN</text>
+                </g>
+                <g class="state-block" data-timezone="Central">
+                    <rect x="410" y="180" width="60" height="60" fill="#9c27b0" stroke="#fff" stroke-width="2"/>
+                    <text x="440" y="215" text-anchor="middle" class="state-label" fill="white" font-weight="bold">IL</text>
+                </g>
+                <g class="state-block" data-timezone="Eastern">
+                    <rect x="470" y="180" width="60" height="60" fill="#f44336" stroke="#fff" stroke-width="2"/>
+                    <text x="500" y="215" text-anchor="middle" class="state-label" fill="white" font-weight="bold">MI</text>
+                </g>
+                <g class="state-block" data-timezone="Eastern">
+                    <rect x="590" y="180" width="60" height="60" fill="#f44336" stroke="#fff" stroke-width="2"/>
+                    <text x="620" y="215" text-anchor="middle" class="state-label" fill="white" font-weight="bold">NY</text>
+                </g>
+                <g class="state-block" data-timezone="Eastern">
+                    <rect x="650" y="180" width="60" height="60" fill="#f44336" stroke="#fff" stroke-width="2"/>
+                    <text x="680" y="215" text-anchor="middle" class="state-label" fill="white" font-weight="bold">MA</text>
+                </g>
+                
+                <!-- Row 3 -->
+                <g class="state-block" data-timezone="Pacific">
+                    <rect x="110" y="240" width="60" height="60" fill="#4caf50" stroke="#fff" stroke-width="2"/>
+                    <text x="140" y="275" text-anchor="middle" class="state-label" fill="white" font-weight="bold">OR</text>
+                </g>
+                <g class="state-block" data-timezone="Pacific">
+                    <rect x="170" y="240" width="60" height="60" fill="#4caf50" stroke="#fff" stroke-width="2"/>
+                    <text x="200" y="275" text-anchor="middle" class="state-label" fill="white" font-weight="bold">NV</text>
+                </g>
+                <g class="state-block" data-timezone="Mountain">
+                    <rect x="230" y="240" width="60" height="60" fill="#2196f3" stroke="#fff" stroke-width="2"/>
+                    <text x="260" y="275" text-anchor="middle" class="state-label" fill="white" font-weight="bold">WY</text>
+                </g>
+                <g class="state-block" data-timezone="Central">
+                    <rect x="290" y="240" width="60" height="60" fill="#9c27b0" stroke="#fff" stroke-width="2"/>
+                    <text x="320" y="275" text-anchor="middle" class="state-label" fill="white" font-weight="bold">SD</text>
+                </g>
+                <g class="state-block" data-timezone="Central">
+                    <rect x="350" y="240" width="60" height="60" fill="#9c27b0" stroke="#fff" stroke-width="2"/>
+                    <text x="380" y="275" text-anchor="middle" class="state-label" fill="white" font-weight="bold">IA</text>
+                </g>
+                <g class="state-block" data-timezone="Eastern">
+                    <rect x="410" y="240" width="60" height="60" fill="#f44336" stroke="#fff" stroke-width="2"/>
+                    <text x="440" y="275" text-anchor="middle" class="state-label" fill="white" font-weight="bold">IN</text>
+                </g>
+                <g class="state-block" data-timezone="Eastern">
+                    <rect x="470" y="240" width="60" height="60" fill="#f44336" stroke="#fff" stroke-width="2"/>
+                    <text x="500" y="275" text-anchor="middle" class="state-label" fill="white" font-weight="bold">OH</text>
+                </g>
+                <g class="state-block" data-timezone="Eastern">
+                    <rect x="530" y="240" width="60" height="60" fill="#f44336" stroke="#fff" stroke-width="2"/>
+                    <text x="560" y="275" text-anchor="middle" class="state-label" fill="white" font-weight="bold">PA</text>
+                </g>
+                <g class="state-block" data-timezone="Eastern">
+                    <rect x="590" y="240" width="60" height="60" fill="#f44336" stroke="#fff" stroke-width="2"/>
+                    <text x="620" y="275" text-anchor="middle" class="state-label" fill="white" font-weight="bold">NJ</text>
+                </g>
+                <g class="state-block" data-timezone="Eastern">
+                    <rect x="650" y="240" width="60" height="60" fill="#f44336" stroke="#fff" stroke-width="2"/>
+                    <text x="680" y="275" text-anchor="middle" class="state-label" fill="white" font-weight="bold">CT</text>
+                </g>
+                <g class="state-block" data-timezone="Eastern">
+                    <rect x="710" y="240" width="60" height="60" fill="#f44336" stroke="#fff" stroke-width="2"/>
+                    <text x="740" y="275" text-anchor="middle" class="state-label" fill="white" font-weight="bold">RI</text>
+                </g>
+                
+                <!-- Row 4 -->
+                <g class="state-block" data-timezone="Pacific">
+                    <rect x="110" y="300" width="60" height="60" fill="#4caf50" stroke="#fff" stroke-width="2"/>
+                    <text x="140" y="335" text-anchor="middle" class="state-label" fill="white" font-weight="bold">CA</text>
+                </g>
+                <g class="state-block" data-timezone="Mountain">
+                    <rect x="170" y="300" width="60" height="60" fill="#2196f3" stroke="#fff" stroke-width="2"/>
+                    <text x="200" y="335" text-anchor="middle" class="state-label" fill="white" font-weight="bold">UT</text>
+                </g>
+                <g class="state-block" data-timezone="Mountain">
+                    <rect x="230" y="300" width="60" height="60" fill="#2196f3" stroke="#fff" stroke-width="2"/>
+                    <text x="260" y="335" text-anchor="middle" class="state-label" fill="white" font-weight="bold">CO</text>
+                </g>
+                <g class="state-block" data-timezone="Central">
+                    <rect x="290" y="300" width="60" height="60" fill="#9c27b0" stroke="#fff" stroke-width="2"/>
+                    <text x="320" y="335" text-anchor="middle" class="state-label" fill="white" font-weight="bold">NE</text>
+                </g>
+                <g class="state-block" data-timezone="Central">
+                    <rect x="350" y="300" width="60" height="60" fill="#9c27b0" stroke="#fff" stroke-width="2"/>
+                    <text x="380" y="335" text-anchor="middle" class="state-label" fill="white" font-weight="bold">MO</text>
+                </g>
+                <g class="state-block" data-timezone="Central">
+                    <rect x="410" y="300" width="60" height="60" fill="#9c27b0" stroke="#fff" stroke-width="2"/>
+                    <text x="440" y="335" text-anchor="middle" class="state-label" fill="white" font-weight="bold">KY</text>
+                </g>
+                <g class="state-block" data-timezone="Eastern">
+                    <rect x="470" y="300" width="60" height="60" fill="#f44336" stroke="#fff" stroke-width="2"/>
+                    <text x="500" y="335" text-anchor="middle" class="state-label" fill="white" font-weight="bold">WV</text>
+                </g>
+                <g class="state-block" data-timezone="Eastern">
+                    <rect x="530" y="300" width="60" height="60" fill="#f44336" stroke="#fff" stroke-width="2"/>
+                    <text x="560" y="335" text-anchor="middle" class="state-label" fill="white" font-weight="bold">VA</text>
+                </g>
+                <g class="state-block" data-timezone="Eastern">
+                    <rect x="590" y="300" width="60" height="60" fill="#f44336" stroke="#fff" stroke-width="2"/>
+                    <text x="620" y="335" text-anchor="middle" class="state-label" fill="white" font-weight="bold">MD</text>
+                </g>
+                <g class="state-block" data-timezone="Eastern">
+                    <rect x="650" y="300" width="60" height="60" fill="#f44336" stroke="#fff" stroke-width="2"/>
+                    <text x="680" y="335" text-anchor="middle" class="state-label" fill="white" font-weight="bold">DE</text>
+                </g>
+                
+                <!-- Row 5 -->
+                <g class="state-block" data-timezone="Mountain">
+                    <rect x="170" y="360" width="60" height="60" fill="#2196f3" stroke="#fff" stroke-width="2"/>
+                    <text x="200" y="395" text-anchor="middle" class="state-label" fill="white" font-weight="bold">AZ</text>
+                </g>
+                <g class="state-block" data-timezone="Mountain">
+                    <rect x="230" y="360" width="60" height="60" fill="#2196f3" stroke="#fff" stroke-width="2"/>
+                    <text x="260" y="395" text-anchor="middle" class="state-label" fill="white" font-weight="bold">NM</text>
+                </g>
+                <g class="state-block" data-timezone="Central">
+                    <rect x="290" y="360" width="60" height="60" fill="#9c27b0" stroke="#fff" stroke-width="2"/>
+                    <text x="320" y="395" text-anchor="middle" class="state-label" fill="white" font-weight="bold">KS</text>
+                </g>
+                <g class="state-block" data-timezone="Central">
+                    <rect x="350" y="360" width="60" height="60" fill="#9c27b0" stroke="#fff" stroke-width="2"/>
+                    <text x="380" y="395" text-anchor="middle" class="state-label" fill="white" font-weight="bold">AR</text>
+                </g>
+                <g class="state-block" data-timezone="Central">
+                    <rect x="410" y="360" width="60" height="60" fill="#9c27b0" stroke="#fff" stroke-width="2"/>
+                    <text x="440" y="395" text-anchor="middle" class="state-label" fill="white" font-weight="bold">TN</text>
+                </g>
+                <g class="state-block" data-timezone="Eastern">
+                    <rect x="470" y="360" width="60" height="60" fill="#f44336" stroke="#fff" stroke-width="2"/>
+                    <text x="500" y="395" text-anchor="middle" class="state-label" fill="white" font-weight="bold">NC</text>
+                </g>
+                <g class="state-block" data-timezone="Eastern">
+                    <rect x="530" y="360" width="60" height="60" fill="#f44336" stroke="#fff" stroke-width="2"/>
+                    <text x="560" y="395" text-anchor="middle" class="state-label" fill="white" font-weight="bold">SC</text>
+                </g>
+                <g class="state-block" data-timezone="Eastern">
+                    <rect x="590" y="360" width="60" height="60" fill="#f44336" stroke="#fff" stroke-width="2"/>
+                    <text x="620" y="395" text-anchor="middle" class="state-label" fill="white" font-weight="bold">DC</text>
+                </g>
+                
+                <!-- Row 6 -->
+                <g class="state-block" data-timezone="Central">
+                    <rect x="290" y="420" width="60" height="60" fill="#9c27b0" stroke="#fff" stroke-width="2"/>
+                    <text x="320" y="455" text-anchor="middle" class="state-label" fill="white" font-weight="bold">OK</text>
+                </g>
+                <g class="state-block" data-timezone="Central">
+                    <rect x="350" y="420" width="60" height="60" fill="#9c27b0" stroke="#fff" stroke-width="2"/>
+                    <text x="380" y="455" text-anchor="middle" class="state-label" fill="white" font-weight="bold">LA</text>
+                </g>
+                <g class="state-block" data-timezone="Central">
+                    <rect x="410" y="420" width="60" height="60" fill="#9c27b0" stroke="#fff" stroke-width="2"/>
+                    <text x="440" y="455" text-anchor="middle" class="state-label" fill="white" font-weight="bold">MS</text>
+                </g>
+                <g class="state-block" data-timezone="Central">
+                    <rect x="470" y="420" width="60" height="60" fill="#9c27b0" stroke="#fff" stroke-width="2"/>
+                    <text x="500" y="455" text-anchor="middle" class="state-label" fill="white" font-weight="bold">AL</text>
+                </g>
+                <g class="state-block" data-timezone="Eastern">
+                    <rect x="530" y="420" width="60" height="60" fill="#f44336" stroke="#fff" stroke-width="2"/>
+                    <text x="560" y="455" text-anchor="middle" class="state-label" fill="white" font-weight="bold">GA</text>
+                </g>
+                
+                <!-- Row 7 -->
+                <g class="state-block" data-timezone="Hawaii">
+                    <rect x="110" y="480" width="60" height="60" fill="#ffeb3b" stroke="#fff" stroke-width="2"/>
+                    <text x="140" y="515" text-anchor="middle" class="state-label" fill="#333" font-weight="bold">HI</text>
+                </g>
+                <g class="state-block" data-timezone="Central">
+                    <rect x="290" y="480" width="60" height="60" fill="#9c27b0" stroke="#fff" stroke-width="2"/>
+                    <text x="320" y="515" text-anchor="middle" class="state-label" fill="white" font-weight="bold">TX</text>
+                </g>
+                <g class="state-block" data-timezone="Eastern">
+                    <rect x="590" y="480" width="60" height="60" fill="#f44336" stroke="#fff" stroke-width="2"/>
+                    <text x="620" y="515" text-anchor="middle" class="state-label" fill="white" font-weight="bold">FL</text>
+                </g>
+                
+                <!-- Time zone labels with times -->
+                <g id="timezone-legend" transform="translate(100, 540)">
+                    <rect x="0" y="0" width="40" height="25" fill="#ffeb3b" stroke="#333" stroke-width="1"/>
+                    <text x="45" y="18" class="timezone-label" font-size="14">Hawaii: <tspan id="hawaii-time" font-weight="bold">--:--</tspan></text>
+                    
+                    <rect x="140" y="0" width="40" height="25" fill="#ff9800" stroke="#333" stroke-width="1"/>
+                    <text x="185" y="18" class="timezone-label" font-size="14">Alaska: <tspan id="alaska-time" font-weight="bold">--:--</tspan></text>
+                    
+                    <rect x="280" y="0" width="40" height="25" fill="#4caf50" stroke="#333" stroke-width="1"/>
+                    <text x="325" y="18" class="timezone-label" font-size="14">Pacific: <tspan id="pacific-time" font-weight="bold">--:--</tspan></text>
+                    
+                    <rect x="420" y="0" width="40" height="25" fill="#2196f3" stroke="#333" stroke-width="1"/>
+                    <text x="465" y="18" class="timezone-label" font-size="14">Mountain: <tspan id="mountain-time" font-weight="bold">--:--</tspan></text>
+                    
+                    <rect x="580" y="0" width="40" height="25" fill="#9c27b0" stroke="#333" stroke-width="1"/>
+                    <text x="625" y="18" class="timezone-label" font-size="14">Central: <tspan id="central-time" font-weight="bold">--:--</tspan></text>
+                    
+                    <rect x="720" y="0" width="40" height="25" fill="#f44336" stroke="#333" stroke-width="1"/>
+                    <text x="765" y="18" class="timezone-label" font-size="14">Eastern: <tspan id="eastern-time" font-weight="bold">--:--</tspan></text>
+                </g>
+            </svg>
+        </div>
+
+        <div class="time-displays" id="timeDisplays">
+            <div class="time-card" data-zone="Eastern">
+                <div class="timezone-name">Eastern Time (ET)</div>
+                <div class="timezone-time" id="eastern-display">--:--</div>
+            </div>
+            <div class="time-card" data-zone="Central">
+                <div class="timezone-name">Central Time (CT)</div>
+                <div class="timezone-time" id="central-display">--:--</div>
+            </div>
+            <div class="time-card" data-zone="Mountain">
+                <div class="timezone-name">Mountain Time (MT)</div>
+                <div class="timezone-time" id="mountain-display">--:--</div>
+            </div>
+            <div class="time-card" data-zone="Pacific">
+                <div class="timezone-name">Pacific Time (PT)</div>
+                <div class="timezone-time" id="pacific-display">--:--</div>
+            </div>
+            <div class="time-card" data-zone="Alaska">
+                <div class="timezone-name">Alaska Time (AKT)</div>
+                <div class="timezone-time" id="alaska-display">--:--</div>
+            </div>
+            <div class="time-card" data-zone="Hawaii">
+                <div class="timezone-name">Hawaii Time (HT)</div>
+                <div class="timezone-time" id="hawaii-display">--:--</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const timezones = {
+            'Eastern': 0,
+            'Central': -1,
+            'Mountain': -2,
+            'Pacific': -3,
+            'Alaska': -4,
+            'Hawaii': -5
+        };
+
+        function convertTime() {
+            const timeInput = document.getElementById('timeInput').value;
+            const selectedTimezone = document.getElementById('timezoneSelect').value;
+            
+            if (!timeInput) {
+                alert('Please enter a time');
+                return;
+            }
+            
+            const [hours, minutes] = timeInput.split(':').map(Number);
+            const baseOffset = timezones[selectedTimezone];
+            
+            // Update all time displays
+            Object.keys(timezones).forEach(zone => {
+                const offset = timezones[zone] - baseOffset;
+                let newHours = (hours + offset + 24) % 24;
+                
+                const formattedTime = formatTime(newHours, minutes);
+                
+                // Update map labels
+                const mapTimeElement = document.getElementById(`${zone.toLowerCase()}-time`);
+                if (mapTimeElement) {
+                    mapTimeElement.textContent = formattedTime;
+                }
+                
+                // Update time cards
+                const displayElement = document.getElementById(`${zone.toLowerCase()}-display`);
+                if (displayElement) {
+                    displayElement.textContent = formattedTime;
+                }
+            });
+            
+            // Highlight current timezone
+            document.querySelectorAll('.time-card').forEach(card => {
+                card.classList.remove('active');
+            });
+            document.querySelector(`[data-zone="${selectedTimezone}"]`).classList.add('active');
+        }
+
+        function formatTime(hours, minutes) {
+            const period = hours >= 12 ? 'PM' : 'AM';
+            const displayHours = hours % 12 || 12;
+            return `${displayHours}:${minutes.toString().padStart(2, '0')} ${period}`;
+        }
+
+        // Add click handlers to state blocks
+        document.querySelectorAll('.state-block').forEach(block => {
+            block.addEventListener('click', function() {
+                const timezone = this.getAttribute('data-timezone');
+                document.getElementById('timezoneSelect').value = timezone;
+                convertTime();
+            });
+        });
+
+        // Convert on load with default values
+        convertTime();
+    </script>
+</body>
+</html>
